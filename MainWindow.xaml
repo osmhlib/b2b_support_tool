@@ -1,0 +1,77 @@
+﻿<Window x:Class="b2b_support_tool.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:b2b_support_tool"
+        mc:Ignorable="d"
+        Title="B2B Support Tool" Height="450" Width="500"
+        ResizeMode="CanMinimize">
+    
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Width" Value="140"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Margin" Value="0,0,0,0"/>
+        </Style>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="150" />
+        </Grid.RowDefinitions>
+        
+        <TabControl Grid.Row="0">
+            <TabItem Header="Clean">
+                <Grid Background="#FFE5E5E5">
+                    <CheckBox x:Name="delCheck" Content="Delete check files older than 14 days" HorizontalAlignment="Left" Margin="20,30,0,0" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="delLog" Content="Delete logs older than 14 days" HorizontalAlignment="Left" Margin="20,70,0,0" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="delTemp" Content="Clear the TEMP folder" HorizontalAlignment="Left" Margin="20,110,0,0" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="delRecyclebin" Content="Clean the recyclebin folder" HorizontalAlignment="Left" Margin="20,150,0,0" VerticalAlignment="Top"/>
+                    <Button x:Name="clean" Content="START" HorizontalAlignment="Left" Margin="300,30,0,0" VerticalAlignment="Top"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Ping/trace">
+                <Grid Background="#FFE5E5E5">
+                    <CheckBox x:Name="pingFtp" Content="Ping FTP" HorizontalAlignment="Left" Margin="20,30,0,0" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="traceFtp" Content="Trace FTP" HorizontalAlignment="Left" Margin="20,70,0,0" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="pingCrm" Content="Ping CRM" HorizontalAlignment="Left" Margin="20,110,0,0" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="traceCrm" Content="Trace CRM" HorizontalAlignment="Left" Margin="20,150,0,0" VerticalAlignment="Top"/>
+                    <Button x:Name="netTest" Content="START" HorizontalAlignment="Left" Margin="300,30,0,0" VerticalAlignment="Top"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Repair">
+                <Grid Background="#FFE5E5E5">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="350">
+                        <Button x:Name="sfc" Content="sfc /scannow" Margin="0,10,0,10" Width="200"/>
+                        <Button x:Name="dism" Content="/DISM" Margin="0,10,0,10" Width="200"/>
+                        <Button x:Name="chkdsk" Content="Checkdisk" Margin="0,10,0,10" Width="200"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Other">
+                <Grid Background="#FFE5E5E5">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="350">
+                        <Button x:Name="printRestart" Content="Restart printer service" Margin="0,10,0,10" Width="200"/>
+                        <Button x:Name="indicatorRestart" Content="Restart Shopdeskindicator" Margin="0,10,0,10" Width="200"/>
+                        <Button x:Name="anydeskIdRenew" Content="Renew AnyDesk ID" Margin="0,10,0,10" Width="200"/>
+                        <Button x:Name="regDll" Content="Register weighing libraries" Margin="0,10,0,10" Width="200"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        
+        <TextBox x:Name="outputBox"
+         Grid.Row="1"
+         IsReadOnly="True"
+         VerticalScrollBarVisibility="Auto"
+         AcceptsReturn="True"
+         TextWrapping="Wrap"
+         FontFamily="Consolas"
+         FontSize="13"
+         Background="DarkBlue"
+         Foreground="White"/>
+    </Grid>
+</Window>
