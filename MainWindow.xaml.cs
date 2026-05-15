@@ -15,9 +15,6 @@ using System.Windows.Shapes;
 
 namespace b2b_support_tool
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public MainWindow()
