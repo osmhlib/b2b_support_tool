@@ -13,9 +13,10 @@
 
 	<ApplicationIcon>02_m_Support.ico</ApplicationIcon>
 	<Version>1.0.3</Version>
-    	<AssemblyVersion>1.0.3.0</AssemblyVersion>
-    	<FileVersion>1.0.3.0</FileVersion>
+    	<AssemblyVersion>1.0.3.1</AssemblyVersion>
+    	<FileVersion>1.0.3.1</FileVersion>
     	<InformationalVersion>1.0.3</InformationalVersion>
+	  <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 	<Authors>b2b_support</Authors>
 	<Company>BASE2BASE</Company>
 	<Product>B2B Support Tool</Product>
