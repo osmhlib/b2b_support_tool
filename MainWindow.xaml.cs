@@ -1,17 +1,9 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace b2b_support_tool
 {
@@ -20,19 +12,34 @@ namespace b2b_support_tool
         public MainWindow()
         {
             InitializeComponent();
+            Title = GetAppTitle();
+
+            if (File.Exists(logPath))
+            {
+                var info = new FileInfo(logPath);
+
+                if (info.Length > 5_000_000) // 5 MB
+                {
+                    File.Delete(logPath);
+                }
+            }
 
             clean.Click += async (s, e) =>
             {
                 outputBox.Clear();
-                clean.IsEnabled = false;
 
-                // Зчитуємо значення в UI потоці
                 bool deleteChecks = delCheck.IsChecked == true;
                 bool deleteLogs = delLog.IsChecked == true;
                 bool deleteTemp = delTemp.IsChecked == true;
                 bool deleteRecycle = delRecyclebin.IsChecked == true;
 
-                try
+                if (!deleteChecks && !deleteLogs && !deleteTemp && !deleteRecycle)
+                {
+                    AppendOutput("Nothing selected.");
+                    return;
+                }
+
+                await RunProtectedOperation(async () =>
                 {
                     await Task.Run(() =>
                     {
@@ -48,99 +55,233 @@ namespace b2b_support_tool
                         if (deleteRecycle)
                             EmptyRecycleBin();
                     });
-                }
-                catch (Exception ex)
-                {
-                    AppendOutput("CRITICAL ERROR: " + ex.Message);
-                }
 
-                clean.IsEnabled = true;
-                AppendOutput("Cleaning finished.");
+                    AppendOutput("Cleaning finished.");
+                });
             };
 
             netTest.Click += async (s, e) =>
             {
                 outputBox.Clear();
 
-                if (pingFtp.IsChecked == true)
-                    await RunProcessAsync("ping", "ftp.base2base.com.ua");
+                bool doPingFtp = pingFtp.IsChecked == true;
+                bool doTraceFtp = traceFtp.IsChecked == true;
+                bool doPingCrm = pingCrm.IsChecked == true;
+                bool doTraceCrm = traceCrm.IsChecked == true;
 
-                if (traceFtp.IsChecked == true)
-                    await RunProcessAsync("tracert", "ftp.base2base.com.ua");
+                if (!doPingFtp && !doTraceFtp && !doPingCrm && !doTraceCrm)
+                {
+                    AppendOutput("Nothing selected.");
+                    return;
+                }
 
-                if (pingCrm.IsChecked == true)
-                    await RunProcessAsync("ping", "crm.base2base.com.ua");
+                await RunProtectedOperation(async () =>
+                {
+                    if (doPingFtp)
+                        await RunProcessAsync("ping", "ftp.base2base.com.ua");
 
-                if (traceCrm.IsChecked == true)
-                    await RunProcessAsync("tracert", "crm.base2base.com.ua");
+                    if (doTraceFtp)
+                        await RunProcessAsync("tracert", "ftp.base2base.com.ua");
+
+                    if (doPingCrm)
+                        await RunProcessAsync("ping", "crm.base2base.com.ua");
+
+                    if (doTraceCrm)
+                        await RunProcessAsync("tracert", "crm.base2base.com.ua");
+                });
             };
 
             sfc.Click += async (s, e) =>
             {
                 outputBox.Clear();
-                AppendOutput("Starting SFC scan...");
-                await RunProcessAsync("cmd.exe", "/c sfc /scannow");
+
+                await RunProtectedOperation(async () =>
+                {
+                    AppendOutput("Starting SFC scan...");
+                    await RunProcessAsync("cmd.exe", "/c sfc /scannow");
+                });
             };
 
             dism.Click += async (s, e) =>
             {
                 outputBox.Clear();
-                AppendOutput("Starting DISM restore health...");
-                await RunProcessAsync("cmd.exe", "/c DISM /Online /Cleanup-Image /RestoreHealth");
+
+                await RunProtectedOperation(async () =>
+                {
+                    AppendOutput("Starting DISM restore health...");
+                    await RunProcessAsync("cmd.exe", "/c DISM /Online /Cleanup-Image /RestoreHealth");
+                });
             };
 
             chkdsk.Click += async (s, e) =>
             {
                 outputBox.Clear();
-                AppendOutput("Scheduling CHKDSK...");
-                await RunProcessAsync("cmd.exe", "/c echo Y | chkdsk C: /f /r");
+
+                await RunProtectedOperation(async () =>
+                {
+                    AppendOutput("Scheduling CHKDSK...");
+                    await RunProcessAsync("cmd.exe", "/c echo Y | chkdsk C: /f /r");
+                });
             };
 
             printRestart.Click += async (s, e) =>
             {
                 outputBox.Clear();
-                AppendOutput("Stopping spooler...");
 
-                await RunProcessAsync("net", "stop spooler");
-                await RunProcessAsync("cmd.exe", "/c del /f /q %systemroot%\\system32\\spool\\PRINTERS\\*.*");
-                await RunProcessAsync("net", "start spooler");
+                await RunProtectedOperation(async () =>
+                {
+                    AppendOutput("Stopping spooler...");
 
-                AppendOutput("Printer service restarted.");
+                    await RunProcessAsync("net", "stop spooler");
+                    await RunProcessAsync("cmd.exe", "/c del /f /q %systemroot%\\system32\\spool\\PRINTERS\\*.*");
+                    await RunProcessAsync("net", "start spooler");
+
+                    AppendOutput("Printer service restarted.");
+                });
             };
 
-            indicatorRestart.Click += async (s, e) =>
+            modulesStart.Click += async (s, e) =>
             {
                 outputBox.Clear();
-                indicatorRestart.IsEnabled = false;
 
-                await Task.Run(() => RestartIndicator());
+                bool doRestartIndicator = restartIndicator.IsChecked == true;
+                bool doRestartBridge = restartBridge.IsChecked == true;
+                bool doRestartTccLocalProcessor = restartTccLocalProcessor.IsChecked == true;
 
-                indicatorRestart.IsEnabled = true;
+                if (!doRestartIndicator && !doRestartBridge && !doRestartTccLocalProcessor)
+                {
+                    AppendOutput("Nothing selected.");
+                    return;
+                }
+
+                await RunProtectedOperation(async () =>
+                {
+                    if (doRestartIndicator)
+                        await Task.Run(() => RestartIndicator());
+
+                    if (doRestartBridge)
+                        await Task.Run(() => RestartModule(
+                            "ShopDeskBridge",
+                            "ShopDeskBridge",
+                            @"C:\ShopDesk\modules\bridge\ShopDeskBridge.exe"));
+
+                    if (doRestartTccLocalProcessor)
+                        await Task.Run(() => RestartModule(
+                            "TccLocalProcessor",
+                            "TccLocalProcessor",
+                            @"C:\ShopDesk\modules\crm\tcc\TccLocalProcessor.exe"));
+                });
+            };
+
+            updateStart.Click += async (s, e) =>
+            {
+                outputBox.Clear();
+
+                bool doUpdateShopdesk = updateShopdesk.IsChecked == true;
+                bool doUpdateScaleServer = updateScaleServer.IsChecked == true;
+
+                if (!doUpdateShopdesk && !doUpdateScaleServer)
+                {
+                    AppendOutput("Nothing selected.");
+                    return;
+                }
+
+                await RunProtectedOperation(async () =>
+                {
+                    if (doUpdateShopdesk)
+                        await DownloadAndRunShopdeskUpdate();
+
+                    if (doUpdateScaleServer)
+                        await DownloadAndRunScaleServerUpdate();
+                });
             };
 
             anydeskIdRenew.Click += async (s, e) =>
             {
                 outputBox.Clear();
-                anydeskIdRenew.IsEnabled = false;
 
-                await Task.Run(() => RenewAnyDeskId());
-
-                anydeskIdRenew.IsEnabled = true;
+                await RunProtectedOperation(async () =>
+                {
+                    await Task.Run(() => RenewAnyDeskId());
+                });
             };
 
             regDll.Click += async (s, e) =>
             {
                 outputBox.Clear();
-                regDll.IsEnabled = false;
 
-                await Task.Run(() => RegisterLibraries());
+                await RunProtectedOperation(async () =>
+                {
+                    await Task.Run(() => RegisterLibraries());
+                });
+            };
 
-                regDll.IsEnabled = true;
+            regWIN.Click += async (s, e) =>
+            {
+                outputBox.Clear();
+
+                await RunProtectedOperation(async () =>
+                {
+                    await ExtractAndRunPowerShellScript(
+                        "b2b_support_tool.Resources.regwin_script.ps1"
+                    );
+                });
             };
         }
 
-        private string _lastOutputLine = "";
+        private string GetAppTitle()
+        {
+            var version = Assembly.GetExecutingAssembly().GetName().Version;
 
+            return $"B2B Support Tool v{version?.Major}.{version?.Minor}.{version?.Build}";
+        }
+
+        private string _lastOutputLine = "";
+        private static readonly HttpClient httpClient = new HttpClient();
+        private readonly string logPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"support_tool.log");
+
+        private void SetControlsEnabled(bool enabled)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                clean.IsEnabled = enabled;
+                netTest.IsEnabled = enabled;
+
+                sfc.IsEnabled = enabled;
+                dism.IsEnabled = enabled;
+                chkdsk.IsEnabled = enabled;
+
+                printRestart.IsEnabled = enabled;
+                modulesStart.IsEnabled = enabled;
+                anydeskIdRenew.IsEnabled = enabled;
+
+                regDll.IsEnabled = enabled;
+                updateStart.IsEnabled = enabled;
+                regWIN.IsEnabled = enabled;
+            });
+        }
+
+        private async Task RunProtectedOperation(Func<Task> operation)
+        {
+            SetControlsEnabled(false);
+
+            Title = GetAppTitle() + " [BUSY]";
+
+            try
+            {
+                await operation();
+            }
+            catch (Exception ex)
+            {
+                AppendOutput("ERROR: " + ex.Message);
+            }
+            finally
+            {
+                Title = GetAppTitle();
+
+                SetControlsEnabled(true);
+            }
+        }
         private void DeleteOldFiles(string path, string pattern, int days, bool recursive = false)
         {
             if (!Directory.Exists(path))
@@ -252,16 +393,29 @@ namespace b2b_support_tool
         [DllImport("Shell32.dll")]
         private static extern uint SHEmptyRecycleBin(
             IntPtr hwnd,
-         string pszRootPath,
+         string? pszRootPath,
          uint dwFlags);
 
         private void AppendOutput(string text)
         {
+            string logLine = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {text}";
+
+            // UI
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                outputBox.AppendText(text + Environment.NewLine);
+                outputBox.AppendText(logLine + Environment.NewLine);
                 outputBox.ScrollToEnd();
             }));
+
+            // File log
+            try
+            {
+                File.AppendAllText(logPath, logLine + Environment.NewLine);
+            }
+            catch
+            {
+                // лог не повинен валити програму
+            }
         }
         private void RegisterLibraries()
         {
@@ -271,10 +425,10 @@ namespace b2b_support_tool
 
                 AppendOutput("Extracting DLLs...");
 
-                ExtractEmbeddedDll("b2b_support_tool.Resources.DigiSM.dll",
+                ExtractEmbeddedFile("b2b_support_tool.Resources.DigiSM.dll",
                                    System.IO.Path.Combine(targetPath, "DigiSM.dll"));
 
-                ExtractEmbeddedDll("b2b_support_tool.Resources.ShopdeskTools.dll",
+                ExtractEmbeddedFile("b2b_support_tool.Resources.ShopdeskTools.dll",
                                    System.IO.Path.Combine(targetPath, "ShopdeskTools.dll"));
 
                 AppendOutput("Registering DigiSM.dll...");
@@ -290,15 +444,14 @@ namespace b2b_support_tool
                 AppendOutput("ERROR: " + ex.Message);
             }
         }
-        private void ExtractEmbeddedDll(string resourceName, string outputPath)
+        private void ExtractEmbeddedFile(string resourceName, string outputPath)
         {
             using (var stream = Assembly.GetExecutingAssembly()
                 .GetManifestResourceStream(resourceName))
             {
                 if (stream == null)
                 {
-                    AppendOutput("Resource not found: " + resourceName);
-                    return;
+                    throw new Exception("Resource not found: " + resourceName);
                 }
 
                 using (var fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
@@ -307,7 +460,7 @@ namespace b2b_support_tool
                 }
             }
 
-            AppendOutput("Copied: " + outputPath);
+            AppendOutput("Extracted: " + outputPath);
         }
         private void RunProcessBlocking(string fileName, string arguments)
         {
@@ -320,19 +473,31 @@ namespace b2b_support_tool
             };
 
             var process = Process.Start(psi);
+            if (process == null)
+            {
+                AppendOutput("ERROR: Failed to start process.");
+                return;
+            }
+
             process.WaitForExit();
 
             AppendOutput($"Exit code: {process.ExitCode}");
         }
         private void RestartIndicator()
         {
+            RestartModule(
+                "ShopdeskIndicator",
+                "ShopdeskIndicator",
+                @"C:\ShopDesk\modules\indicator\ShopdeskIndicator.exe");
+        }
+
+        private void RestartModule(string displayName, string processName, string executablePath)
+        {
             try
             {
-                string exePath = @"C:\ShopDesk\modules\indicator\ShopdeskIndicator.exe";
+                AppendOutput($"Searching for running {displayName}...");
 
-                AppendOutput("Searching for running ShopdeskIndicator...");
-
-                var processes = Process.GetProcessesByName("ShopdeskIndicator");
+                var processes = Process.GetProcessesByName(processName);
 
                 if (processes.Length == 0)
                 {
@@ -359,13 +524,15 @@ namespace b2b_support_tool
                 AppendOutput("Waiting 2 seconds...");
                 Thread.Sleep(2000);
 
+                string exePath = ResolveExecutablePath(executablePath);
+
                 if (!File.Exists(exePath))
                 {
                     AppendOutput("ERROR: Executable not found.");
                     return;
                 }
 
-                AppendOutput("Starting ShopdeskIndicator...");
+                AppendOutput($"Starting {displayName}...");
                 Process.Start(exePath);
 
                 AppendOutput("Restart completed.");
@@ -374,6 +541,22 @@ namespace b2b_support_tool
             {
                 AppendOutput("ERROR: " + ex.Message);
             }
+        }
+
+        private string ResolveExecutablePath(string executablePath)
+        {
+            if (File.Exists(executablePath))
+                return executablePath;
+
+            if (!System.IO.Path.HasExtension(executablePath))
+            {
+                string pathWithExeExtension = executablePath + ".exe";
+
+                if (File.Exists(pathWithExeExtension))
+                    return pathWithExeExtension;
+            }
+
+            return executablePath;
         }
         private void RenewAnyDeskId()
         {
@@ -471,8 +654,167 @@ namespace b2b_support_tool
                 catch { }
             }
         }
+
+        private async Task ExtractAndRunPowerShellScript(string resourceName)
+        {
+            string scriptPath = System.IO.Path.Combine(
+                System.IO.Path.GetTempPath(),
+                "regwin_script.ps1"
+            );
+
+            ExtractEmbeddedFile(resourceName, scriptPath);
+
+            AppendOutput("Starting PowerShell script...");
+
+            await RunProcessAsync(
+                "powershell.exe",
+                $"-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File \"{scriptPath}\""
+            );
+
+            TryDeleteFile(scriptPath);
+        }
+
+        private void TryDeleteFile(string path)
+        {
+            try
+            {
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                    AppendOutput("Temporary script deleted.");
+                }
+            }
+            catch (Exception ex)
+            {
+                AppendOutput("Could not delete temporary script: " + ex.Message);
+            }
+        }
+
+        private async Task DownloadAndRunShopdeskUpdate()
+        {
+            await DownloadAndRunInstaller(
+                "Shopdesk",
+                "https://andriy.co/download.ashx?dl=Shopdesk_setup.exe",
+                "Shopdesk_setup.exe");
+        }
+
+        private async Task DownloadAndRunScaleServerUpdate()
+        {
+            await DownloadAndRunInstaller(
+                "ScaleServer",
+                "https://andriy.co/download/products/ScaleServerSetup.exe",
+                "ScaleServerSetup.exe");
+        }
+
+        private async Task DownloadAndRunInstaller(string productName, string url, string installerFileName)
+        {
+            string installerPath = System.IO.Path.Combine(
+                System.IO.Path.GetTempPath(),
+                installerFileName
+            );
+
+            AppendOutput($"[1/3] Downloading latest {productName} version...");
+
+            await DownloadFileWithProgress(url, installerPath);
+
+            AppendOutput("Download completed:");
+            AppendOutput(installerPath);
+
+            AppendOutput("[2/3] Starting installer...");
+
+            var process = Process.Start(new ProcessStartInfo
+            {
+                FileName = installerPath,
+                UseShellExecute = true
+            });
+
+            if (process != null)
+            {
+                await Task.Run(() => process.WaitForExit());
+            }
+
+            AppendOutput("[3/3] Removing installer...");
+
+            DeleteInstallerWithRetry(installerPath);
+
+            AppendOutput($"{productName} update completed.");
+        }
+        private async Task DownloadFileWithProgress(string url, string outputPath)
+        {
+
+            using var response = await httpClient.GetAsync(
+                url,
+                HttpCompletionOption.ResponseHeadersRead
+            );
+
+            response.EnsureSuccessStatusCode();
+
+            long? totalBytes = response.Content.Headers.ContentLength;
+
+            using var contentStream = await response.Content.ReadAsStreamAsync();
+            using var fileStream = new FileStream(
+                outputPath,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.None,
+                bufferSize: 8192,
+                useAsync: true
+            );
+
+            byte[] buffer = new byte[8192];
+            long totalRead = 0;
+            int bytesRead;
+            int lastProgress = -1;
+
+            while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+            {
+                await fileStream.WriteAsync(buffer, 0, bytesRead);
+                totalRead += bytesRead;
+
+                if (totalBytes.HasValue)
+                {
+                    int progress = (int)((totalRead * 100) / totalBytes.Value);
+
+                    if (progress >= lastProgress + 1)
+                    {
+                        lastProgress = progress;
+                        AppendOutput($"Download progress: {progress}%");
+                    }
+                }
+                else
+                {
+                    AppendOutput($"Downloaded: {totalRead / 1024 / 1024} MB");
+                }
+            }
+        }
+
+        private void DeleteInstallerWithRetry(string path)
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                try
+                {
+                    if (File.Exists(path))
+                    {
+                        File.Delete(path);
+                        AppendOutput("Installer deleted.");
+                    }
+
+                    return;
+                }
+                catch
+                {
+                    Thread.Sleep(1000);
+                }
+            }
+
+            AppendOutput("Installer was not deleted. It may still be in use.");
+        }
+
         private async Task RunProcessAsync(string fileName, string arguments)
         {
+            _lastOutputLine = "";
+
             await Task.Run(() =>
             {
                 var psi = new ProcessStartInfo

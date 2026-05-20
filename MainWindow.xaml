@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:b2b_support_tool"
         mc:Ignorable="d"
-        Title="B2B Support Tool" Height="450" Width="500"
+        Title="{Binding WindowTitle}" Height="450" Width="500"
         ResizeMode="CanMinimize">
     
     <Window.Resources>
@@ -26,20 +26,52 @@
         <TabControl Grid.Row="0">
             <TabItem Header="Clean">
                 <Grid Background="#FFE5E5E5">
-                    <CheckBox x:Name="delCheck" Content="Delete check files older than 14 days" HorizontalAlignment="Left" Margin="20,30,0,0" VerticalAlignment="Top"/>
-                    <CheckBox x:Name="delLog" Content="Delete logs older than 14 days" HorizontalAlignment="Left" Margin="20,70,0,0" VerticalAlignment="Top"/>
-                    <CheckBox x:Name="delTemp" Content="Clear the TEMP folder" HorizontalAlignment="Left" Margin="20,110,0,0" VerticalAlignment="Top"/>
-                    <CheckBox x:Name="delRecyclebin" Content="Clean the recyclebin folder" HorizontalAlignment="Left" Margin="20,150,0,0" VerticalAlignment="Top"/>
-                    <Button x:Name="clean" Content="START" HorizontalAlignment="Left" Margin="300,30,0,0" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="delCheck" Content="Delete check files older than 14 days"
+                              HorizontalAlignment="Left" Margin="20,30,0,0" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="delLog" Content="Delete logs older than 14 days"
+                              HorizontalAlignment="Left" Margin="20,70,0,0" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="delTemp" Content="Clear the TEMP folder"
+                              HorizontalAlignment="Left" Margin="20,110,0,0" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="delRecyclebin" Content="Clean the recyclebin folder"
+                              HorizontalAlignment="Left" Margin="20,150,0,0" VerticalAlignment="Top"/>
+                    <Button x:Name="clean" Content="START"
+                            HorizontalAlignment="Left" Margin="300,30,0,0" VerticalAlignment="Top"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Ping/trace">
                 <Grid Background="#FFE5E5E5">
-                    <CheckBox x:Name="pingFtp" Content="Ping FTP" HorizontalAlignment="Left" Margin="20,30,0,0" VerticalAlignment="Top"/>
-                    <CheckBox x:Name="traceFtp" Content="Trace FTP" HorizontalAlignment="Left" Margin="20,70,0,0" VerticalAlignment="Top"/>
-                    <CheckBox x:Name="pingCrm" Content="Ping CRM" HorizontalAlignment="Left" Margin="20,110,0,0" VerticalAlignment="Top"/>
-                    <CheckBox x:Name="traceCrm" Content="Trace CRM" HorizontalAlignment="Left" Margin="20,150,0,0" VerticalAlignment="Top"/>
-                    <Button x:Name="netTest" Content="START" HorizontalAlignment="Left" Margin="300,30,0,0" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="pingFtp" Content="Ping FTP"
+                              HorizontalAlignment="Left" Margin="20,30,0,0" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="traceFtp" Content="Trace FTP"
+                              HorizontalAlignment="Left" Margin="20,70,0,0" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="pingCrm" Content="Ping CRM"
+                              HorizontalAlignment="Left" Margin="20,110,0,0" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="traceCrm" Content="Trace CRM"
+                              HorizontalAlignment="Left" Margin="20,150,0,0" VerticalAlignment="Top"/>
+                    <Button x:Name="netTest" Content="START"
+                            HorizontalAlignment="Left" Margin="300,30,0,0" VerticalAlignment="Top"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Modules">
+                <Grid Background="#FFE5E5E5">
+                    <CheckBox x:Name="restartIndicator" Content="Restart ShopdeskIndicator"
+                              HorizontalAlignment="Left" Margin="20,30,0,0" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="restartBridge" Content="Restart Bridge"
+                              HorizontalAlignment="Left" Margin="20,70,0,0" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="restartTccLocalProcessor" Content="Restart TccLocalProcessor"
+                              HorizontalAlignment="Left" Margin="20,110,0,0" VerticalAlignment="Top"/>
+                    <Button x:Name="modulesStart" Content="START"
+                            HorizontalAlignment="Left" Margin="300,30,0,0" VerticalAlignment="Top"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Update">
+                <Grid Background="#FFE5E5E5">
+                    <CheckBox x:Name="updateShopdesk" Content="Install or update Shopdesk"
+                              HorizontalAlignment="Left" Margin="20,30,0,0" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="updateScaleServer" Content="Install or update ScaleServer"
+                              HorizontalAlignment="Left" Margin="20,70,0,0" VerticalAlignment="Top"/>
+                    <Button x:Name="updateStart" Content="START"
+                            HorizontalAlignment="Left" Margin="300,30,0,0" VerticalAlignment="Top"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Repair">
@@ -51,13 +83,18 @@
                     </StackPanel>
                 </Grid>
             </TabItem>
+
             <TabItem Header="Other">
                 <Grid Background="#FFE5E5E5">
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="350">
-                        <Button x:Name="printRestart" Content="Restart printer service" Margin="0,10,0,10" Width="200"/>
-                        <Button x:Name="indicatorRestart" Content="Restart Shopdeskindicator" Margin="0,10,0,10" Width="200"/>
-                        <Button x:Name="anydeskIdRenew" Content="Renew AnyDesk ID" Margin="0,10,0,10" Width="200"/>
-                        <Button x:Name="regDll" Content="Register weighing libraries" Margin="0,10,0,10" Width="200"/>
+                        <Button x:Name="printRestart" Content="Restart printer service"
+                                Margin="0,10,0,10" Width="200"/>
+                        <Button x:Name="anydeskIdRenew" Content="Renew AnyDesk ID"
+                                Margin="0,10,0,10" Width="200"/>
+                        <Button x:Name="regDll" Content="Register weighing libraries"
+                                Margin="0,10,0,10" Width="200"/>
+                        <Button x:Name="regWIN" Content="Activate Windows"
+                                Margin="0,10,0,10" Width="200"/>
                     </StackPanel>
                 </Grid>
             </TabItem>
