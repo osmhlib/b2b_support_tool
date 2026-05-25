@@ -1,0 +1,104 @@
+<mxfile host="app.diagrams.net" agent="Codex" version="24.7.17" type="device">
+  <diagram id="b2b-support-tool-class-diagram-clean-ua" name="Діаграма класів">
+    <mxGraphModel dx="1700" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1050" background="#FFFFFF" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="B2B Support Tool - діаграма класів" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=24;fontStyle=1;fontColor=#111827" vertex="1" parent="1">
+          <mxGeometry x="470" y="20" width="660" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uiLayer" value="Інтерфейс" style="swimlane;html=1;startSize=34;rounded=0;whiteSpace=wrap;fillColor=#F3F8FF;strokeColor=#B7CDE8;fontColor=#111827;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="40" y="90" width="330" height="790" as="geometry" />
+        </mxCell>
+        <mxCell id="servicesLayer" value="Сервісні класи" style="swimlane;html=1;startSize=34;rounded=0;whiteSpace=wrap;fillColor=#F0FDF4;strokeColor=#BBF7D0;fontColor=#111827;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="430" y="90" width="680" height="790" as="geometry" />
+        </mxCell>
+        <mxCell id="infraLayer" value="Інфраструктурні класи" style="swimlane;html=1;startSize=34;rounded=0;whiteSpace=wrap;fillColor=#FAF5FF;strokeColor=#D8B4FE;fontColor=#111827;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="1170" y="90" width="360" height="790" as="geometry" />
+        </mxCell>
+
+        <mxCell id="mainWindow" value="&lt;b&gt;MainWindow : Window&lt;/b&gt;&lt;hr&gt;− _logger: SupportLogger&lt;br&gt;− _cleanupService: CleanupService&lt;br&gt;− _networkDiagnosticsService: NetworkDiagnosticsService&lt;br&gt;− _windowsRepairService: WindowsRepairService&lt;br&gt;− _printerService: PrinterService&lt;br&gt;− _moduleService: ModuleService&lt;br&gt;− _updateService: UpdateService&lt;br&gt;− _anyDeskService: AnyDeskService&lt;br&gt;− _weighingLibrariesService: WeighingLibrariesService&lt;hr&gt;+ MainWindow()&lt;br&gt;− BindEvents(): void&lt;br&gt;− RunSelectedActions(actions): Task&lt;br&gt;− RunProtectedOperation(operation): Task&lt;br&gt;− SetControlsEnabled(enabled): void&lt;br&gt;− AppendOutputToUi(logLine): void" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B7CDE8;fontColor=#111827;align=left;spacingLeft=10;" vertex="1" parent="uiLayer">
+          <mxGeometry x="25" y="65" width="280" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="xaml" value="&lt;b&gt;MainWindow.xaml&lt;/b&gt;&lt;hr&gt;UI-елементи&lt;br&gt;• вкладки&lt;br&gt;• кнопки&lt;br&gt;• чекбокси&lt;br&gt;• outputBox" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#D1D5DB;fontColor=#111827;align=left;spacingLeft=10;" vertex="1" parent="uiLayer">
+          <mxGeometry x="25" y="570" width="280" height="145" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cleanupService" value="&lt;b&gt;CleanupService&lt;/b&gt;&lt;hr&gt;− _logger: ISupportLogger&lt;hr&gt;+ CleanAsync(...): Task&lt;br&gt;− DeleteOldFiles(...): void&lt;br&gt;− CleanTemp(): void&lt;br&gt;− EmptyRecycleBin(): void" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#BBF7D0;fontColor=#111827;align=left;spacingLeft=10;" vertex="1" parent="servicesLayer">
+          <mxGeometry x="30" y="55" width="285" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="networkService" value="&lt;b&gt;NetworkDiagnosticsService&lt;/b&gt;&lt;hr&gt;− _processRunner: ProcessRunner&lt;hr&gt;+ RunAsync(pingFtp, traceFtp, pingCrm, traceCrm): Task" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#BBF7D0;fontColor=#111827;align=left;spacingLeft=10;" vertex="1" parent="servicesLayer">
+          <mxGeometry x="365" y="55" width="285" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="moduleService" value="&lt;b&gt;ModuleService&lt;/b&gt;&lt;hr&gt;− _logger: ISupportLogger&lt;hr&gt;+ RestartAsync(displayName, processName, executablePath): Task&lt;br&gt;− ResolveExecutablePath(path): string" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#BBF7D0;fontColor=#111827;align=left;spacingLeft=10;" vertex="1" parent="servicesLayer">
+          <mxGeometry x="30" y="215" width="285" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="updateService" value="&lt;b&gt;UpdateService&lt;/b&gt;&lt;hr&gt;− _logger: ISupportLogger&lt;hr&gt;+ InstallOrUpdateAsync(productName, url, installerFileName): Task&lt;br&gt;− DownloadFileWithProgress(...): Task&lt;br&gt;− DeleteInstallerWithRetry(path): void" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#BBF7D0;fontColor=#111827;align=left;spacingLeft=10;" vertex="1" parent="servicesLayer">
+          <mxGeometry x="365" y="215" width="285" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="repairService" value="&lt;b&gt;WindowsRepairService&lt;/b&gt;&lt;hr&gt;− _logger: ISupportLogger&lt;br&gt;− _processRunner: ProcessRunner&lt;hr&gt;+ RunSfcAsync(): Task&lt;br&gt;+ RunDismAsync(): Task&lt;br&gt;+ ScheduleChkdskAsync(): Task" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#BBF7D0;fontColor=#111827;align=left;spacingLeft=10;" vertex="1" parent="servicesLayer">
+          <mxGeometry x="30" y="380" width="285" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="printerService" value="&lt;b&gt;PrinterService&lt;/b&gt;&lt;hr&gt;− _logger: ISupportLogger&lt;br&gt;− _processRunner: ProcessRunner&lt;hr&gt;+ RestartAsync(): Task" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#BBF7D0;fontColor=#111827;align=left;spacingLeft=10;" vertex="1" parent="servicesLayer">
+          <mxGeometry x="365" y="400" width="285" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="anyDeskService" value="&lt;b&gt;AnyDeskService&lt;/b&gt;&lt;hr&gt;− _logger: ISupportLogger&lt;hr&gt;+ RenewIdAsync(): Task&lt;br&gt;− KillProcess(processName): void" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#BBF7D0;fontColor=#111827;align=left;spacingLeft=10;" vertex="1" parent="servicesLayer">
+          <mxGeometry x="30" y="550" width="285" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="weighingService" value="&lt;b&gt;WeighingLibrariesService&lt;/b&gt;&lt;hr&gt;− _logger: ISupportLogger&lt;br&gt;− _resourceExtractor: EmbeddedResourceExtractor&lt;br&gt;− _processRunner: ProcessRunner&lt;hr&gt;+ RegisterAsync(): Task" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#BBF7D0;fontColor=#111827;align=left;spacingLeft=10;" vertex="1" parent="servicesLayer">
+          <mxGeometry x="365" y="540" width="285" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="loggerInterface" value="&lt;b&gt;&amp;lt;&amp;lt;interface&amp;gt;&amp;gt;&lt;br&gt;ISupportLogger&lt;/b&gt;&lt;hr&gt;+ Write(text): void" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D8B4FE;fontColor=#111827;align=left;spacingLeft=10;" vertex="1" parent="infraLayer">
+          <mxGeometry x="35" y="55" width="290" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="supportLogger" value="&lt;b&gt;SupportLogger&lt;/b&gt;&lt;hr&gt;− _logPath: string&lt;br&gt;− _appendToUi: Action&amp;lt;string&amp;gt;&lt;hr&gt;+ Initialize(): void&lt;br&gt;+ Write(text): void" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D8B4FE;fontColor=#111827;align=left;spacingLeft=10;" vertex="1" parent="infraLayer">
+          <mxGeometry x="35" y="190" width="290" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="processRunner" value="&lt;b&gt;ProcessRunner&lt;/b&gt;&lt;hr&gt;− _logger: ISupportLogger&lt;br&gt;− _lastOutputLine: string&lt;hr&gt;+ RunAsync(fileName, arguments): Task&lt;br&gt;+ RunBlocking(fileName, arguments): void" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D8B4FE;fontColor=#111827;align=left;spacingLeft=10;" vertex="1" parent="infraLayer">
+          <mxGeometry x="35" y="370" width="290" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="resourceExtractor" value="&lt;b&gt;EmbeddedResourceExtractor&lt;/b&gt;&lt;hr&gt;− _logger: ISupportLogger&lt;br&gt;− _assembly: Assembly&lt;hr&gt;+ Extract(resourceName, outputPath): void" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D8B4FE;fontColor=#111827;align=left;spacingLeft=10;" vertex="1" parent="infraLayer">
+          <mxGeometry x="35" y="555" width="290" height="130" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uiToServices" value="створює та викликає сервіси" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#16A34A;strokeWidth=3;endArrow=block;fontColor=#166534;labelBackgroundColor=#FFFFFF;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="325" y="510" as="sourcePoint" />
+            <mxPoint x="430" y="510" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="servicesToInfraLogger" value="ISupportLogger" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#9333EA;strokeWidth=3;endArrow=block;fontColor=#6B21A8;labelBackgroundColor=#FFFFFF;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1110" y="150" as="sourcePoint" />
+            <mxPoint x="1170" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="servicesToInfraRunner" value="ProcessRunner" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#9333EA;strokeWidth=3;endArrow=block;fontColor=#6B21A8;labelBackgroundColor=#FFFFFF;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1110" y="440" as="sourcePoint" />
+            <mxPoint x="1170" y="440" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="servicesToInfraExtractor" value="EmbeddedResourceExtractor" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#9333EA;strokeWidth=3;endArrow=block;fontColor=#6B21A8;labelBackgroundColor=#FFFFFF;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1110" y="620" as="sourcePoint" />
+            <mxPoint x="1170" y="620" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="xamlToMw" value="partial class" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#64748B;strokeWidth=2;endArrow=open;dashed=1;dashPattern=8 8;fontColor=#475569;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="xaml" target="mainWindow">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="loggerImplements" value="реалізує" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#9333EA;strokeWidth=2;endArrow=block;endFill=0;dashed=1;dashPattern=8 8;fontColor=#6B21A8;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="supportLogger" target="loggerInterface">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend" value="Позначення зв'язків&lt;br&gt;&lt;font style=&quot;font-size: 11px;&quot;&gt;Суцільна стрілка - створення або використання&lt;br&gt;Пунктирна стрілка з порожнім трикутником - реалізація інтерфейсу / partial-зв'язок&lt;br&gt;Детальні залежності показані у полях класів, щоб уникнути перетину ліній з блоками&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#CBD5E1;fontColor=#111827;align=left;spacingLeft=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="925" width="1490" height="90" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
