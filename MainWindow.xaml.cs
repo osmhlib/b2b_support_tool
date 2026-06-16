@@ -1,4 +1,6 @@
 using System.Reflection;
+using System.Net;
+using System.Net.Sockets;
 using System.Windows;
 using b2b_support_tool.Infrastructure;
 using b2b_support_tool.Services;
@@ -14,6 +16,7 @@ namespace b2b_support_tool
         private readonly PrinterService _printerService;
         private readonly ModuleService _moduleService;
         private readonly UpdateService _updateService;
+        private readonly ExternalIpService _externalIpService;
         private readonly AnyDeskService _anyDeskService;
         private readonly WeighingLibrariesService _weighingLibrariesService;
         private readonly WindowsActivationService _windowsActivationService;
@@ -35,6 +38,7 @@ namespace b2b_support_tool
             _printerService = new PrinterService(_logger, processRunner);
             _moduleService = new ModuleService(_logger);
             _updateService = new UpdateService(_logger);
+            _externalIpService = new ExternalIpService();
             _anyDeskService = new AnyDeskService(_logger);
             _weighingLibrariesService = new WeighingLibrariesService(_logger, resourceExtractor, processRunner);
             _windowsActivationService = new WindowsActivationService(_logger, resourceExtractor, processRunner);
@@ -42,8 +46,10 @@ namespace b2b_support_tool
             _logger.Initialize();
 
             Title = GetAppTitle();
+            copyExternalIp.IsEnabled = false;
 
             BindEvents();
+            Loaded += async (_, _) => await RefreshExternalIpAsync();
         }
 
         private string GetAppTitle()
@@ -97,6 +103,19 @@ namespace b2b_support_tool
                     doTraceFtp,
                     doPingCrm,
                     doTraceCrm));
+            };
+
+            copyExternalIp.Click += (_, _) =>
+            {
+                if (IsValidIpv4(externalIpBox.Text))
+                {
+                    Clipboard.SetText(externalIpBox.Text);
+                }
+            };
+
+            refreshExternalIp.Click += async (_, _) =>
+            {
+                await RefreshExternalIpAsync();
             };
 
             modulesStart.Click += async (_, _) =>
@@ -243,6 +262,7 @@ namespace b2b_support_tool
             {
                 clean.IsEnabled = enabled;
                 netTest.IsEnabled = enabled;
+                refreshExternalIp.IsEnabled = enabled;
 
                 modulesStart.IsEnabled = enabled;
                 updateStart.IsEnabled = enabled;
@@ -265,6 +285,48 @@ namespace b2b_support_tool
                 outputBox.AppendText(logLine + Environment.NewLine);
                 outputBox.ScrollToEnd();
             }));
+        }
+
+        private async Task RefreshExternalIpAsync()
+        {
+            SetExternalIpText("Getting IP...");
+            refreshExternalIp.IsEnabled = false;
+
+            try
+            {
+                string? ipAddress = await _externalIpService.GetPublicIpv4Async();
+
+                SetExternalIpText(IsValidIpv4(ipAddress) ? ipAddress! : "No IP address");
+            }
+            finally
+            {
+                refreshExternalIp.IsEnabled = true;
+            }
+        }
+
+        private void SetExternalIpText(string text)
+        {
+            externalIpBox.Text = text;
+
+            if (copyExternalIp != null)
+            {
+                copyExternalIp.IsEnabled = IsValidIpv4(text);
+            }
+        }
+
+        private static bool IsValidIpv4(string? value)
+        {
+            return IPAddress.TryParse(value, out var ipAddress)
+                && ipAddress.AddressFamily == AddressFamily.InterNetwork
+                && value?.Split('.').Length == 4;
+        }
+
+        private void ExternalIpBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            if (copyExternalIp != null)
+            {
+                copyExternalIp.IsEnabled = IsValidIpv4(externalIpBox.Text);
+            }
         }
     }
 }
