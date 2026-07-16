@@ -30,9 +30,12 @@ namespace b2b_support_tool.Infrastructure
 
         public void Write(string text)
         {
-            string logLine = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {text}";
+            text = NormalizeText(text);
+            var now = DateTime.Now;
+            string logLine = $"[{now:yyyy-MM-dd HH:mm:ss}] {text}";
+            string uiLine = $"[{now:HH:mm:ss}] {text}";
 
-            _appendToUi(logLine);
+            _appendToUi(uiLine);
 
             try
             {
@@ -42,6 +45,14 @@ namespace b2b_support_tool.Infrastructure
             {
                 // Logging must never break support actions.
             }
+        }
+
+        private static string NormalizeText(string text)
+        {
+            return text
+                .Replace('\r', ' ')
+                .Replace('\n', ' ')
+                .Trim();
         }
     }
 }

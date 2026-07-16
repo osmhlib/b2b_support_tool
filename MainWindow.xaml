@@ -165,10 +165,12 @@
          Grid.Row="1"
          IsReadOnly="True"
          VerticalScrollBarVisibility="Auto"
+         HorizontalScrollBarVisibility="Auto"
          AcceptsReturn="True"
-         TextWrapping="Wrap"
+         TextWrapping="NoWrap"
          FontFamily="Consolas"
-         FontSize="13"
+         FontSize="12"
+         Padding="4,2"
          Background="DarkBlue"
          Foreground="White"/>
     </Grid>

@@ -25,7 +25,7 @@ namespace b2b_support_tool.Services
                     DeleteOldFiles(@"C:\Shopdesk\offline\grr\arh", "*.*", 14);
 
                 if (deleteLogs)
-                    DeleteOldFiles(@"C:\Shopdesk", "*.log", 14, true);
+                    DeleteOldFiles(@"C:\Shopdesk", new[] { "*.log", "*.txt" }, 14, true);
 
                 if (deleteTemp)
                     CleanTemp();
@@ -39,6 +39,11 @@ namespace b2b_support_tool.Services
 
         private void DeleteOldFiles(string path, string pattern, int days, bool recursive = false)
         {
+            DeleteOldFiles(path, new[] { pattern }, days, recursive);
+        }
+
+        private void DeleteOldFiles(string path, IEnumerable<string> patterns, int days, bool recursive = false)
+        {
             if (!Directory.Exists(path))
             {
                 _logger.Write($"Path not found: {path}");
@@ -51,7 +56,7 @@ namespace b2b_support_tool.Services
             int deletedCount = 0;
             int errorCount = 0;
 
-            foreach (var file in SafeEnumerateFiles(path, pattern, option))
+            foreach (var file in SafeEnumerateFiles(path, patterns, option))
             {
                 try
                 {
@@ -97,6 +102,13 @@ namespace b2b_support_tool.Services
             return files;
         }
 
+        private static IEnumerable<string> SafeEnumerateFiles(string path, IEnumerable<string> patterns, SearchOption option)
+        {
+            return patterns
+                .SelectMany(pattern => SafeEnumerateFiles(path, pattern, option))
+                .Distinct(StringComparer.OrdinalIgnoreCase);
+        }
+
         private void CleanTemp()
         {
             string tempPath = Path.Combine(
@@ -122,7 +134,7 @@ namespace b2b_support_tool.Services
                 catch { }
             }
 
-            foreach (var dir in Directory.GetDirectories(tempPath))
+            foreach (var dir in SafeEnumerateDirectories(tempPath))
             {
                 try
                 {
@@ -139,12 +151,31 @@ namespace b2b_support_tool.Services
         {
             try
             {
-                SHEmptyRecycleBin(IntPtr.Zero, null, 0);
+                uint result = SHEmptyRecycleBin(IntPtr.Zero, null, 0);
+
+                if (result != 0)
+                {
+                    _logger.Write($"ERROR cleaning recycle bin (HRESULT 0x{result:X8}).");
+                    return;
+                }
+
                 _logger.Write("Recycle bin cleaned.");
             }
             catch (Exception ex)
             {
-                _logger.Write("ERROR cleaning recycle bin: " + ex.Message);
+                _logger.Write($"ERROR cleaning recycle bin ({ex.GetType().Name}).");
+            }
+        }
+
+        private static IEnumerable<string> SafeEnumerateDirectories(string path)
+        {
+            try
+            {
+                return Directory.GetDirectories(path);
+            }
+            catch
+            {
+                return Enumerable.Empty<string>();
             }
         }
 

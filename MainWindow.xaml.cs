@@ -20,6 +20,8 @@ namespace b2b_support_tool
         private readonly AnyDeskService _anyDeskService;
         private readonly WeighingLibrariesService _weighingLibrariesService;
         private readonly WindowsActivationService _windowsActivationService;
+        private bool _isOperationRunning;
+        private bool _isRefreshingExternalIp;
 
         public MainWindow()
         {
@@ -33,7 +35,7 @@ namespace b2b_support_tool
             var resourceExtractor = new EmbeddedResourceExtractor(_logger, Assembly.GetExecutingAssembly());
 
             _cleanupService = new CleanupService(_logger);
-            _networkDiagnosticsService = new NetworkDiagnosticsService(processRunner);
+            _networkDiagnosticsService = new NetworkDiagnosticsService(_logger);
             _windowsRepairService = new WindowsRepairService(_logger, processRunner);
             _printerService = new PrinterService(_logger, processRunner);
             _moduleService = new ModuleService(_logger);
@@ -238,6 +240,7 @@ namespace b2b_support_tool
 
         private async Task RunProtectedOperation(Func<Task> operation)
         {
+            _isOperationRunning = true;
             SetControlsEnabled(false);
             Title = GetAppTitle() + " [BUSY]";
 
@@ -245,13 +248,14 @@ namespace b2b_support_tool
             {
                 await operation();
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.Write("ERROR: " + ex.Message);
+                _logger.Write("ERROR: Operation failed.");
             }
             finally
             {
                 Title = GetAppTitle();
+                _isOperationRunning = false;
                 SetControlsEnabled(true);
             }
         }
@@ -262,7 +266,7 @@ namespace b2b_support_tool
             {
                 clean.IsEnabled = enabled;
                 netTest.IsEnabled = enabled;
-                refreshExternalIp.IsEnabled = enabled;
+                refreshExternalIp.IsEnabled = enabled && !_isRefreshingExternalIp;
 
                 modulesStart.IsEnabled = enabled;
                 updateStart.IsEnabled = enabled;
@@ -289,6 +293,7 @@ namespace b2b_support_tool
 
         private async Task RefreshExternalIpAsync()
         {
+            _isRefreshingExternalIp = true;
             SetExternalIpText("Getting IP...");
             refreshExternalIp.IsEnabled = false;
 
@@ -300,7 +305,8 @@ namespace b2b_support_tool
             }
             finally
             {
-                refreshExternalIp.IsEnabled = true;
+                _isRefreshingExternalIp = false;
+                refreshExternalIp.IsEnabled = !_isOperationRunning;
             }
         }
 

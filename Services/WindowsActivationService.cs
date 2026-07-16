@@ -32,7 +32,8 @@ namespace b2b_support_tool.Services
 
             await _processRunner.RunAsync(
                 "powershell.exe",
-                $"-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File \"{scriptPath}\""
+                $"-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File \"{scriptPath}\"",
+                logStandardOutput: false
             );
 
             TryDeleteFile(scriptPath);
@@ -48,9 +49,9 @@ namespace b2b_support_tool.Services
                     _logger.Write("Temporary script deleted.");
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.Write("Could not delete temporary script: " + ex.Message);
+                _logger.Write("Could not delete temporary script.");
             }
         }
     }

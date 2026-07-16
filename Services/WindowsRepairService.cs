@@ -16,19 +16,19 @@ namespace b2b_support_tool.Services
         public async Task RunSfcAsync()
         {
             _logger.Write("Starting SFC scan...");
-            await _processRunner.RunAsync("cmd.exe", "/c sfc /scannow");
+            await _processRunner.RunAsync("cmd.exe", "/c sfc /scannow", logStandardOutput: false);
         }
 
         public async Task RunDismAsync()
         {
             _logger.Write("Starting DISM restore health...");
-            await _processRunner.RunAsync("cmd.exe", "/c DISM /Online /Cleanup-Image /RestoreHealth");
+            await _processRunner.RunAsync("cmd.exe", "/c DISM /Online /Cleanup-Image /RestoreHealth /English", logStandardOutput: false);
         }
 
         public async Task ScheduleChkdskAsync()
         {
             _logger.Write("Scheduling CHKDSK...");
-            await _processRunner.RunAsync("cmd.exe", "/c echo Y | chkdsk C: /f /r");
+            await _processRunner.RunAsync("cmd.exe", "/c echo Y | chkdsk C: /f /r", logStandardOutput: false);
         }
     }
 }

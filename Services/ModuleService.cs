@@ -22,6 +22,7 @@ namespace b2b_support_tool.Services
                     _logger.Write($"Searching for running {displayName}...");
 
                     var processes = Process.GetProcessesByName(processName);
+                    bool stoppedRunningProcess = false;
 
                     if (processes.Length == 0)
                     {
@@ -36,17 +37,25 @@ namespace b2b_support_tool.Services
                                 _logger.Write($"Stopping PID {proc.Id}...");
                                 proc.Kill();
                                 proc.WaitForExit();
+                                stoppedRunningProcess = true;
                                 _logger.Write("Stopped successfully.");
                             }
                             catch (Exception ex)
                             {
-                                _logger.Write("ERROR stopping process: " + ex.Message);
+                                _logger.Write($"ERROR stopping process ({ex.GetType().Name}).");
+                            }
+                            finally
+                            {
+                                proc.Dispose();
                             }
                         }
                     }
 
-                    _logger.Write("Waiting 2 seconds...");
-                    Thread.Sleep(2000);
+                    if (stoppedRunningProcess)
+                    {
+                        _logger.Write("Waiting 2 seconds...");
+                        Thread.Sleep(2000);
+                    }
 
                     string exePath = ResolveExecutablePath(executablePath);
 
@@ -63,7 +72,7 @@ namespace b2b_support_tool.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.Write("ERROR: " + ex.Message);
+                    _logger.Write($"ERROR: Module restart failed ({ex.GetType().Name}).");
                 }
             });
         }

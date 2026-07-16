@@ -45,9 +45,9 @@ namespace b2b_support_tool.Services
 
                     _logger.Write("DLL registration completed.");
                 }
-                catch (Exception ex)
+                catch
                 {
-                    _logger.Write("ERROR: " + ex.Message);
+                    _logger.Write("ERROR: DLL registration failed.");
                 }
             });
         }
